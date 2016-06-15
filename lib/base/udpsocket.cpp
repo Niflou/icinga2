@@ -1,6 +1,6 @@
 /******************************************************************************
  * Icinga 2                                                                   *
- * Copyright (C) 2012-2017 Icinga Development Team (https://www.icinga.com/)  *
+ * Copyright (C) 2012-2016 Icinga Development Team (https://www.icinga.org/)  *
  *                                                                            *
  * This program is free software; you can redistribute it and/or              *
  * modify it under the terms of the GNU General Public License                *
@@ -17,32 +17,17 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.             *
  ******************************************************************************/
 
-#ifndef TCPSOCKET_H
-#define TCPSOCKET_H
+#include "base/udpsocket.hpp"
+#include "base/logger.hpp"
+#include "base/utility.hpp"
+#include "base/exception.hpp"
+#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_errno.hpp>
+#include <iostream>
 
-#include "base/i2-base.hpp"
-#include "base/socket.hpp"
+using namespace icinga;
 
-namespace icinga
-{
-
-/**
- * A TCP socket.
- *
- * @ingroup base
- */
-class I2_BASE_API TcpSocket : public Socket
-{
-public:
-	DECLARE_PTR_TYPEDEFS(TcpSocket);
-
-	void Bind(const String& service, int family);
-	void Bind(const String& node, const String& service, int family);
-
-private:
-	void SocketType();
-};
-
+void UdpSocket::SocketType(){
+	socktype = SOCK_DGRAM;
+	protocol = IPPROTO_UDP;
 }
-
-#endif /* TCPSOCKET_H */

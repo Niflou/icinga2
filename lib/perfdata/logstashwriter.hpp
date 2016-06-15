@@ -1,6 +1,6 @@
 /******************************************************************************
  * Icinga 2                                                                   *
- * Copyright (C) 2012-2017 Icinga Development Team (https://www.icinga.com/)  *
+ * Copyright (C) 2012-2016 Icinga Development Team (https://www.icinga.org/)  *
  *                                                                            *
  * This program is free software; you can redistribute it and/or              *
  * modify it under the terms of the GNU General Public License                *
@@ -17,32 +17,51 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.             *
  ******************************************************************************/
 
-#ifndef TCPSOCKET_H
-#define TCPSOCKET_H
+#ifndef LOGSTASHWRITER_H
+#define LOGSTASHWRITER_H
 
-#include "base/i2-base.hpp"
-#include "base/socket.hpp"
+#include "perfdata/logstashwriter.thpp"
+#include "icinga/service.hpp"
+#include "base/configobject.hpp"
+#include "base/tcpsocket.hpp"
+#include "base/udpsocket.hpp"
+#include "base/timer.hpp"
+#include <fstream>
+#include <string>
 
 namespace icinga
 {
 
 /**
- * A TCP socket.
+ * An Icinga logstash writer.
  *
- * @ingroup base
+ * @ingroup perfdata
  */
-class I2_BASE_API TcpSocket : public Socket
+class LogstashWriter : public ObjectImpl<LogstashWriter>
 {
 public:
-	DECLARE_PTR_TYPEDEFS(TcpSocket);
+        DECLARE_OBJECT(LogstashWriter);
+        DECLARE_OBJECTNAME(LogstashWriter);
 
-	void Bind(const String& service, int family);
-	void Bind(const String& node, const String& service, int family);
+protected:
+        virtual void Start(bool runtimeCreated) override;
 
 private:
-	void SocketType();
+        Stream::Ptr m_Stream;
+
+        Timer::Ptr m_ReconnectTimer;
+
+        void CheckResultHandler(const Checkable::Ptr& checkable, const CheckResult::Ptr& cr);
+        void NotificationToUserHandler(const Notification::Ptr& notification, const Checkable::Ptr& checkable,
+        const User::Ptr& user, NotificationType notification_type, CheckResult::Ptr const& cr,
+        const String& author, const String& comment_text, const String& command_name);
+        void StateChangeHandler(const Checkable::Ptr& checkable, const CheckResult::Ptr& cr, StateType type);
+        void SendLogMessage(const String& message);
+	String ComposeLogstashMessage(const Dictionary::Ptr& fields, const String& source, double ts);
+
+        void ReconnectTimerHandler(void);
 };
 
 }
 
-#endif /* TCPSOCKET_H */
+#endif /* LOGSTASHWRITER_H */

@@ -63,3 +63,4 @@ private:
 }
 
 #endif /* GELFWRITER_H */
+
